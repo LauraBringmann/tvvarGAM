@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "exportPattern(\"^[[:alpha:]]+\")\n\n\n# Load packages\n\nimport(mgcv)\nimport(mvtnorm)\nimport(MASS)\n\n# Export functions\nexport(tvvarGAM)\nexport(tvvarDATA)\n",
+    "created" : 1502105764566.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2837508213",
+    "id" : "91FB779E",
+    "lastKnownWriteTime" : 1502105767,
+    "last_content_update" : 1502105767438,
+    "path" : "/Volumes/Macintosh HD 2/Dropbox/MyData/_PhD/__software/tvvarGAM/NAMESPACE",
+    "project_path" : "NAMESPACE",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_namespace"
+}

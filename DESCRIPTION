@@ -11,7 +11,4 @@ Description: With this package one can estimate time-varying vector autoregressi
 License: What license is it under?
 Encoding: UTF-8
 LazyData: truedata
-Imports: 
-    mvtnorm,
-    mgcv,
-    
+Imports: mvtnorm, mgcv, MASS
