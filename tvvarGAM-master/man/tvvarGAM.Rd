@@ -1,0 +1,122 @@
+\name{tvvarGAM}
+\alias{tvvarGAM}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{
+Time-varying vector autoregressive models using GAM
+}
+\description{
+This is the main function of the package tvvarGAM. With this tvvarGAM one can estimate a smooth function for all variables simultaneously, including the intercepts, using generalized additive models (GAM). The output is an object of the mgcv package (the package used to estimate GAM's). In this way, one can easily estimate and plot time-varying smooth functions for all coefficients in a TV-VAR model.
+}
+\usage{
+tvvarGAM(data, nv, nt, nb=10, plot=TRUE, simulated=TRUE, SIMdata, estimates=FALSE)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{data}{
+     is a data frame containing the variables in the model. This argument is empty by default.
+}
+  \item{nv}{
+   a scalar indicating the number of variables in the model. This argument is empty by default
+}
+  \item{nt}{
+    a scalar indicating the number of time points in the model. This argument is empty by default
+}
+  \item{nb}{
+     a scalar indicating the number of basis functions used for each smooth function. The default setting is 10, just as in the mgcv package.
+}
+
+\item{plot}{
+    an expression to plot the smooth functions of your model. The default is TRUE.
+}
+
+\item{simulated}{
+    indicates if your data was simulated. The default is TRUE.
+}
+
+\item{SIMdata}{
+    optional argument. In case your data is simulated you have to feed the simulated data using the tvvarSIM function.
+}
+
+\item{Estimates}{
+    optional argument. In case you would like the exact values of the smooth functions you can put Estimates=TRUE. This will take much longer than just the standard GAM function. The default is set to FALSE.
+}
+
+
+}
+\details{
+%%  ~~ If necessary, more details than the description above ~~
+}
+\value{
+The value that are returned is a list as desrcribed in \code{\link{gamObject}}.
+
+In case you want the parameters of the smooth functions directly, use Estimates=TRUE.
+This returns a  LIST
+ \item{Estimate }{This gives the estimates of all smooth functions. The first argument is the coefficient number of the independent variable starting with the intercept (e.g., interecept, y1L, y2L). The second argument indicates which dependent variable it is (e.g., y1, y2). The third argument is indicative of the number of time points.}
+\item{CI_low}{This gives the credible interval (lower limit) of all smooth functions. The first argument is the coefficient number of the independent variable starting with the intercept (e.g., interecept, y1L, y2L). The second argument indicates which dependent variable it is (e.g., y1, y2). The third argument is indicative of the number of time points.}
+\item{CI_high}{This gives the credible interval (upper limit) of all smooth functions. The first argument is the coefficient number of the independent variable starting with the intercept (e.g., interecept, y1L, y2L). The second argument indicates which dependent variable it is (e.g., y1, y2). The third argument is indicative of the number of time points.}
+
+
+
+
+
+}
+\references{
+%% ~put references to the literature/web site here ~
+}
+\author{
+%%  ~~who you are~~
+}
+\note{
+%%  ~~further notes~~
+}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+See Also \code{\link{mgcv}}
+}
+\examples{
+#Simulate data
+set.seed(12345)
+nt<-1000
+nv<-2
+rho<-choose.coefaint(FUN=c(2,2),nt=nt,nv=nv,MaxAbsValue = c(0.3,0.5)) #linear function
+aint<-choose.coefaint(FUN=c(3,3),nt=nt,nv=nv,MaxAbsValue = c(1,1)) #cosine function
+
+SIMdata<-tvvarSIM(aint,rho,nt=nt,nv=nv)
+DATA<-tvvarSIM(aint,rho,nt=nt,nv=nv)$y
+
+#Estimate and plot
+
+GAM<-tvvarGAM(data=DATA,nt=nt,nv=nv,10,plot=FALSE)
+
+#Looking at the object shows you the formula that has been used
+GAM[[1]] # this shows you the input for the first variable
+summary(GAM[[1]]) # This is the summary statistics for the first variable
+
+
+#If all coefficients in the model are estimated as smooth variables you can use the following plotting function
+
+tvvarGAM(data=DATA,nt=nt,nv=nv,10,plot=TRUE,simulated=TRUE,SIMdata=SIMdata) # in case it is simulated data
+tvvarGAM(data=DATA,nt=nt,nv=nv,10,plot=TRUE,simulated=FALSE)# In case it is not simulated data
+
+
+#If you want directly the parameters of the estimated coefficients you can do the following:
+GAM<-tvvarGAM(data=DATA,nt=nt,nv=nv,10,plot=FALSE,estimates=TRUE)
+
+
+#In this case, you can just plot the smooth functions like this:
+#To plot the results of y2 ~ y1L (y2 regressed on y1L)
+       plot.ts(GAM$Estimate[2,2,],ylab="y2 regressed on y1L",ylim=c(-1,1))
+       lines(GAM$CI_low[2,2,],lty=2)
+       lines(GAM$CI_high[2,2,],lty=2)
+#To plot the results of y2 ~ intercept (intercept of y2 )
+       plot.ts(GAM$Estimate[1,2,],ylab="intercept y2",ylim=c(-1,1))
+       lines(GAM$CI_low[1,2,],lty=2)
+       lines(GAM$CI_high[1,2,],lty=2)
+
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
+\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

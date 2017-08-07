@@ -1,0 +1,12 @@
+exportPattern("^[[:alpha:]]+")
+
+
+# Load packages
+
+import(mgcv)
+import(mvtnorm)
+import(MASS)
+
+# Export functions
+export(tvvarGAM)
+export(tvvarDATA)
