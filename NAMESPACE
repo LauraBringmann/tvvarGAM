@@ -6,6 +6,7 @@ exportPattern("^[[:alpha:]]+")
 import(mgcv)
 import(mvtnorm)
 import(MASS)
+import(mgm)
 
 # Export functions
 export(tvvarGAM)
