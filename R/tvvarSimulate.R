@@ -43,7 +43,7 @@ stat.check=function(nt,rho){
   WAAR=c()
   duizend=rep(NA,nt)
   for (t in 1:(nt)){
-    duizend[t]=ifelse (max(abs(eigen( matrix(rho[t,],nv,nv))$values))<1,1,0)
+    duizend[t]=ifelse (max(abs(eigen(matrix(rho[t,],nv,nv))$values))<1,1,0)
   }
   WAAR=all(duizend==1)
   return(WAAR)
@@ -61,9 +61,9 @@ choose.coefaint<-function(FUN,nt,MaxAbsValue,nv){
 
 
 
-choose.coefrho<-function(FUNr,nt,MaxAbsValue,nv){  #choose one of the above intercept simulations
+choose.coefrho<-function(FUNr,nt,MaxAbsValue,nv){
   FUNchoose=c(invariant,linear,sine)
-  rho=matrix(NA,(nt),(nv*nv))
+  rho=matrix(NA,nt,nv*nv)
   for(i in 1:(nv*nv)){
     rho[,i]=FUNchoose[[FUNr[i]]](nt,MaxAbsValue[i])
   }
