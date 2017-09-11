@@ -114,7 +114,6 @@ tvvarGAM <- function(data, # the n x p data matrix
     }
 
     Data1=as.data.frame(Data1)
-    colnames(Data1)=c(paste("y",1:nv,sep=""),paste("y",1:nv,"L",sep=""))
 
 
     # Instead use lagData() from the mgm package
@@ -128,14 +127,14 @@ tvvarGAM <- function(data, # the n x p data matrix
     Data2 <- cbind(lagD_obj$data_response, lagD_obj$l_data_lags[[1]])
     Data2 <- rbind(rep(NA, ncol(Data2)), Data2) # to make Laura's code below work
     Data2 <- as.data.frame(Data2)
-    colnames(Data2)=c(paste("y",1:nv,sep=""),paste("y",1:nv,"L",sep=""))
+    coln<-colnames(data)
+    colnL=paste(coln,"L",sep="")
+    colnames(Data2)=c(coln,colnL)
     Data1 <- Data2
 
-    coln=colnames(Data1)[1:nv]
-    colnL=colnames(Data1)[(nv+1):(nv*2)]
+
+
     allcol2=c()
-
-
     for(i in 1:nv){allcol2[i]=paste("s(tt,by=",colnL[i],",k=nb",")",sep="")}
     allcol3=paste(allcol2,collapse="+")
 

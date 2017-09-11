@@ -80,7 +80,7 @@ See Also \code{\link{mgcv}}
 set.seed(12345)
 nt<-1000
 nv<-2
-rho<-choose.coefaint(FUN=c(2,2),nt=nt,nv=nv,MaxAbsValue = c(0.3,0.5)) #linear function
+rho<-choose.coefrho(FUN=c(2,2,2,2),nt=nt,nv=nv,MaxAbsValue = c(0.3,0.4,0.1,0.5)) #linear function with 4 parameters (autoregressive and crosslagged effects)
 aint<-choose.coefaint(FUN=c(3,3),nt=nt,nv=nv,MaxAbsValue = c(1,1)) #cosine function
 
 SIMdata<-tvvarSIM(aint,rho,nt=nt,nv=nv)
