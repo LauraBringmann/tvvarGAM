@@ -88,7 +88,7 @@ DATA<-tvvarSIM(aint,rho,nt=nt,nv=nv)$y
 
 #Estimate and plot
 
-GAM<-tvvarGAM(data=DATA,nt=nt,nv=nv,10,plot=FALSE)
+GAM<-tvvarGAM(data=DATA,plot=FALSE)
 
 #Looking at the object shows you the formula that has been used
 GAM[[1]] # this shows you the input for the first variable

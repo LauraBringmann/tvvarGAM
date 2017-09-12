@@ -98,5 +98,6 @@ tvvarSIM<-function(aint,rho,nt,nv){
 
   }
 
+  colnames(y)=paste("y",1:nv,sep="")
   return(list(y=y,aint=aint,rho=rho))
 }
