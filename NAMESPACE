@@ -10,4 +10,4 @@ import(mgm)
 
 # Export functions
 export(tvvarGAM)
-export(tvvarDATA)
+#export(tvvarDATA)

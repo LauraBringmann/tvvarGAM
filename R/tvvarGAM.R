@@ -1,57 +1,116 @@
-
-
-
 tvvarGAM <- function(data, # the n x p data matrix
                      nb = 10,
                      consec,
-                     SIMdata,
+                     SIMdata=NULL,
                      simulated = FALSE,
-                     plot = FALSE,
-                     estimates = TRUE,
-                     tvvar=TRUE,
-                     tresholding=TRUE,
-                     pbar){ #data is the data,nt is the number of time points, nv=number of variables and k is the number of knots
+                     plot = TRUE,
+                     estimates = FALSE,
+                     tvvarOpt="TVVAR",
+                     tresholding=FALSE,
+                     pbar){
 
 
+  #---------- Input check ---------
+
+  if(!(is.numeric(data))) stop('Object data has to be numeric.')
+  ifelse(simulated==TRUE,ifelse(is.null(SIMdata)==FALSE,ifelse(plot==TRUE,TRUE,TRUE),stop("SIMdata had to be defined")),TRUE)
+  if(tvvarOpt=="VAR" & estimates==TRUE & plot==FALSE) stop("You cannot get the estimates of a VAR model with this argument, please put estimates=FALSE")
+  if(tvvarOpt=="VAR" & plot==TRUE) stop("With this function you cannot get a plot of the parameters of a VAR model, please put plot=FALSE")
 
   # --------- Fill in defaults ---------
 
   if(missing(pbar)) pbar <- TRUE
+
   if(missing(consec)) consec <- 1:nrow(data) # if not provided, assume all measurements are subsequent
 
   # --------- Compute Aux Variables ---------
 
   nt <- nrow(data)
   nv <- ncol(data)
+  if(nv==1){if(is.numeric(data)==FALSE) stop('Object data has to be numeric')}
+  else{if(all(apply(data[,],2,is.numeric))==FALSE) stop('Object data has to be numeric')}
+
+
   tt=1:nt
+  coln<-colnames(data)#Defining the colnames
+  if(is.null(coln)) stop("Colnames need to be defined")
+  colnL=paste(coln,"L",sep="") #And the lagged colnames
+
+  call <- list(data= data,nb=nb,consec=consec,
+               SIMdata=SIMdata,
+               simulated=simulated,
+               plot=plot,
+               estimates=estimates,
+               tvvarOpt=tvvarOpt,
+               tresholding=tresholding)
+
+  #%##########################################%###
+  ####  Part 1: creating the data #############
+  #%##########################################%##
+  #The functions in this part are created in the file (source code for simulation article 3.R)
+
+  y <- data
+
+  #%##########################################%###
+  ####  Part 2: ESTIMATING GAM##### #############
+  #%##########################################%##
+
+  mod_all <- tvvarDATA(data = y,
+                       nb = nb,
+                       pbar = TRUE)$model
+
+  # --------- Case: estimates = TRUE ---------
+
+  if(estimates==TRUE | plot==TRUE) {
 
 
-  # --------- Case I: estimates = TRUE ---------
+    if(plot==TRUE & simulated==TRUE){
+      par(mfrow=c(nv,(nv+1)))
+      tt=1:nt
+      for (i in 1:nv){
+        mod<-mod_all[[i]]
+        k=0
 
-  if(estimates==TRUE) {
+        for ( j in 1:(nv+1))
+          if(j==1)
+          {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],xlab="Time",ylab=paste("Intercept of variable",coln[i],sep=""))
+            lines(tt,SIMdata$aint[,i],col="red")
+          }
+        else {plot.gam(mod,seWithMean = TRUE,select=j,rug=F,ylim=c(-1,1),xlab="Time",ylab=paste(coln[i]," is regressed on ",colnL[j-1],sep=""))
+          k=1+k
 
+          lines(tt,SIMdata$rho[,k],col="red")
+
+        }
+      }
+
+    }  else if (plot==TRUE) {  par(mfrow=c(nv,(nv+1)))
+      for (i in 1:nv){
+        mod<-mod_all[[i]]
+        k=0
+
+        for ( j in 1:(nv+1))
+          if(j==1)
+          {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],ylab=paste("Intercept of variable",coln[i],sep=""))
+          }
+        else {plot.gam(mod,seWithMean = TRUE,select=j,rug=F,ylim=c(-1,1),xlab="Time",ylab=paste(coln[i]," is regressed on ",colnL[j-1],sep=""))
+          k=1+k
+
+
+        }
+      }
+
+    }
+
+
+
+    if(estimates==TRUE){
 
     Results_GAM<-array(NA,c(c(nv+1,nv),nt,3))
 
 
-    #%##########################################%###
-    ####  Part 1: creating the data #############
-    #%##########################################%##
-    #The functions in this part are created in the file (source code for simulation article 3.R)
 
-    y <- data
 
-    #%##########################################%###
-    ####  Part 2: ESTIMATING GAM##### #############
-    #%##########################################%##
-
-    mod_all <- tvvarGAM(data = y,
-                        nb = nb,
-                        SIMdata = FALSE,
-                        simulated = FALSE,
-                        plot = FALSE,
-                        estimates = FALSE,
-                        pbar = TRUE)
 
     if(tresholding==TRUE){
     for (ii in 1:nv){
@@ -116,12 +175,15 @@ tvvarGAM <- function(data, # the n x p data matrix
 
 
 
-      outlist<-list('Estimate'=Results_GAM[, , , 2],'CI_low'=Results_GAM[, , , 3],'CI_high'=Results_GAM[, , , 1])
+      Results<-list('Estimate'=Results_GAM[, , , 2],'CI_low'=Results_GAM[, , , 3],'CI_high'=Results_GAM[, , , 1])
+
+
+      outlist<-list(call=call,Results_GAM=Results,model=mod_all)
 
     }
 
 
-    return(Results_GAM=outlist)
+    return(outlist)
   }
 
 
@@ -171,149 +233,35 @@ tvvarGAM <- function(data, # the n x p data matrix
       }
 
 
-      outlist<-list('Estimate'=Results_GAM[, , , 2],'CI_low'=Results_GAM[, , , 3],'CI_high'=Results_GAM[, , , 1])
-
-    }
-    return(Results_GAM=outlist)
+      Results<-list('Estimate'=Results_GAM[, , , 2],'CI_low'=Results_GAM[, , , 3],'CI_high'=Results_GAM[, , , 1])
 
 
-    }
-
-
-
-
-    # --------- Case I: estimates = FALSE ---------
-
-   } else {
-
-
-
-
-    # Use lagData() from the mgm package
-
-    lagD_obj <- mgm:::lagData(data,
-                              lags = 1,
-                              consec = consec)
-
-
-    # Back to Laura's variable names:
-    Data2 <- cbind(lagD_obj$data_response, lagD_obj$l_data_lags[[1]])
-    Data2 <- rbind(rep(NA, ncol(Data2)), Data2) # to make Laura's code below work
-    Data2 <- as.data.frame(Data2)
-    coln<-colnames(data)
-    colnL=paste(coln,"L",sep="")
-    colnames(Data2)=c(coln,colnL)
-    Data1 <- Data2
-
-
-
-
-    # --------- Case: tvvar = TRUE ---------
-    if(tvvar==TRUE) {
-    allcol2=c()
-    for(i in 1:nv){allcol2[i]=paste("s(tt,by=",colnL[i],",k=nb",")",sep="")}
-    allcol3=paste(allcol2,collapse="+")
-
-
-    # Progress bar
-    if(pbar==TRUE) pb <- txtProgressBar(min = 0, max=nv, initial=0, char="-", style = 3)
-
-    model=list()
-    for (j in 1:nv){
-
-      ff <- as.formula(paste(coln[j]," ~ ","s(tt,k=nb)","+",allcol3))
-      model[[j]]<-gam(ff,data=Data1,seWithMean=TRUE)
-
-      # Update Progress Bar
-      if(pbar==TRUE) setTxtProgressBar(pb, j)
+      outlist<-list(call=call,Results_GAM=Results,model=mod_all)
 
 
     }
-    }
-
-    # --------- Case: tvvar = FALSE and thus a standard VAR is estimated ---------
-
-    else{
-      allcol2=c()
-      for(i in 1:nv){allcol2[i]=paste(colnL[i],sep="")}
-      allcol3=paste(allcol2,collapse="+")
-
-
-      # Progress bar
-      if(pbar==TRUE) pb <- txtProgressBar(min = 0, max=nv, initial=0, char="-", style = 3)
-
-      model=list()
-      for (j in 1:nv){
-
-        ff <- as.formula(paste(coln[j]," ~ ","tt","+",allcol3))
-        model[[j]]<-gam(ff,data=Data1,seWithMean=TRUE)
-
-        # Update Progress Bar
-        if(pbar==TRUE) setTxtProgressBar(pb, j)
-
-
-      }
-
-
+    return(outlist)
 
 
     }
 
 
+  }
 
 
-
-
-
-
-
-    # --------- Plotting Stuff ---------
-
-
-    if(plot==TRUE & simulated==TRUE){
-      par(mfrow=c(nv,(nv+1)))
-      tt=1:nt
-      for (i in 1:nv){
-        mod<-model[[i]]
-        k=0
-
-        for ( j in 1:(nv+1))
-          if(j==1)
-          {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],ylab="intercept")
-            lines(tt,SIMdata$aint[,i],col="red")
-          }
-        else {plot.gam(mod,seWithMean = TRUE,select=j,rug=F,ylim=c(-1,1))
-          k=1+k
-
-          lines(tt,SIMdata$rho[,k],col="red")
-
-        }
-      }
-    }  else if (plot==TRUE) {  par(mfrow=c(nv,(nv+1)))
-      for (i in 1:nv){
-        mod<-model[[i]]
-        k=0
-
-        for ( j in 1:(nv+1))
-          if(j==1)
-          {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],ylab="intercept")
-          }
-        else {plot.gam(mod,seWithMean = TRUE,select=j,rug=F,ylim=c(-1,1))
-          k=1+k
-
-
-        }
-      }
-    } else {
 
 
       # Return Estimates
 
-      return(model)
 
-    }
+
+
 
   }
-}
+  else{
+    outlist<-list(call=call,model=mod_all)
+    return(outlist)
+  }
 
+}
 
