@@ -67,11 +67,13 @@ tvvarGAM <- function(data, # the n x p data matrix
     if(plot==TRUE & simulated==TRUE){
       par(mfrow=c(nv,(nv+1)))
       tt=1:nt
+      k=0
       for (i in 1:nv){
         mod<-mod_all[[i]]
-        k=0
+
 
         for ( j in 1:(nv+1))
+
           if(j==1)
           {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],xlab="Time",ylab=paste("Intercept of variable",coln[i],sep=""))
             lines(tt,SIMdata$aint[,i],col="red")
@@ -87,14 +89,13 @@ tvvarGAM <- function(data, # the n x p data matrix
     }  else if (plot==TRUE) {  par(mfrow=c(nv,(nv+1)))
       for (i in 1:nv){
         mod<-mod_all[[i]]
-        k=0
+
 
         for ( j in 1:(nv+1))
           if(j==1)
           {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],ylab=paste("Intercept of variable",coln[i],sep=""))
           }
         else {plot.gam(mod,seWithMean = TRUE,select=j,rug=F,ylim=c(-1,1),xlab="Time",ylab=paste(coln[i]," is regressed on ",colnL[j-1],sep=""))
-          k=1+k
 
 
         }
