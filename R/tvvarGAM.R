@@ -112,14 +112,14 @@ tvvarGAM <- function(data, # the n x p data matrix
 
 
 
-
+    #-----------------Tresholding---------------
     if(tresholding==TRUE){
     for (ii in 1:nv){
 
       mod <- mod_all[[ii]]
 
       mat_dat<-matrix(c(tt,rep(rep(1,nt),nv)),length(tt),nv+1)
-      coln_Data<-paste("y",1:nv,"L",sep="")
+      coln_Data<-colnL
       coln_Data_full<-c("tt",coln_Data)
       colnames(mat_dat)<-coln_Data_full
       newd<-as.data.frame(mat_dat)
@@ -134,7 +134,7 @@ tvvarGAM <- function(data, # the n x p data matrix
 
       #The confidence intervals
 
-      #-----------------Tresholding---------------
+
 
 
 
@@ -198,7 +198,7 @@ tvvarGAM <- function(data, # the n x p data matrix
       mod <- mod_all[[ii]]
 
       mat_dat<-matrix(c(tt,rep(rep(1,nt),nv)),length(tt),nv+1)
-      coln_Data<-paste("y",1:nv,"L",sep="")
+      coln_Data<-colnL
       coln_Data_full<-c("tt",coln_Data)
       colnames(mat_dat)<-coln_Data_full
       newd<-as.data.frame(mat_dat)
