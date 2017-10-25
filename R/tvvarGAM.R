@@ -23,9 +23,9 @@ tvvarGAM <- function(data, # the n x p data matrix
   # --------- Fill in defaults ---------
 
   if(missing(pbar)) pbar <- TRUE
-
-  if(missing(consec)) consec <- 1:nrow(data) # if not provided, assume all measurements are subsequent
-
+  if(missing(consec)) consec <- NULL
+  if(missing(beepvar)) beepvar <- NULL
+  if(missing(dayvar)) dayvar <- NULL
   # --------- Compute Aux Variables ---------
 
   nt <- nrow(data)
@@ -44,6 +44,8 @@ tvvarGAM <- function(data, # the n x p data matrix
                simulated=simulated,
                plot=plot,
                estimates=estimates,
+               beepvar=beepvar,
+               dayvar=dayvar,
                tvvarOpt=tvvarOpt,
                tresholding=tresholding)
 
@@ -61,10 +63,6 @@ tvvarGAM <- function(data, # the n x p data matrix
 
   mod_all <- tvvarDATA(data = y,
                        nb = nb,
-                       scale,
-                       beepvar,
-                       dayvar,
-                       consec,
                        pbar = TRUE)$model
 
   # --------- Case: estimates = TRUE ---------
@@ -269,6 +267,7 @@ tvvarGAM <- function(data, # the n x p data matrix
   }
   else{
     outlist<-list(call=call,model=mod_all)
+
     return(outlist)
   }
 
