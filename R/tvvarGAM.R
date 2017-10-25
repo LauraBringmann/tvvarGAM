@@ -5,8 +5,11 @@ tvvarGAM <- function(data, # the n x p data matrix
                      simulated = FALSE,
                      plot = TRUE,
                      estimates = FALSE,
+                     beepvar,
+                     dayvar,
                      tvvarOpt="TVVAR",
                      tresholding=FALSE,
+                     scale=FALSE,
                      pbar){
 
 

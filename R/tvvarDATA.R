@@ -1,6 +1,9 @@
 tvvarDATA <- function(data, # the n x p data matrix
                      nb = 10,
                      consec,
+                     beepvar,
+                     dayvar,
+                     scale=FALSE,
                      tvvarOpt="TVVAR",
                      pbar){ #data is the data,nt is the number of time points, nv=number of variables and k is the number of knots
 
@@ -12,10 +15,32 @@ tvvarDATA <- function(data, # the n x p data matrix
 
   # --------- Compute Aux Variables ---------
 
+  # ----- Compute consec argument -----
+  mgm::: beepday2consec
+
+  # Input checks (can only specify consec OR beepvar and dayvar)
+
+  if(!is.null(consec) & !is.null(beepvar)) stop("Please specify the consecutiveness of measurements either via consec, or via dayvar and beepvar")
+  if(!is.null(consec) & !is.null(dayvar)) stop("Please specify the consecutiveness of measurements either via consec, or via dayvar and beepvar")
+
+  if(!is.null(dayvar)) if(is.null(beepvar)) stop("Argument beepvar not specified.")
+  if(!is.null(beepvar)) if(is.null(dayvar)) stop("Argument dayvar not specified.")
+
+  if(!is.null(beepvar) & !is.null(dayvar)) {
+
+    consec <- beepday2consec(beepvar = beepvar,
+                             dayvar = dayvar)
+
+  } # if: specification of consecutiveness via beepvar and dayvar
+
+
+
   nt <- nrow(data)
   nv <- ncol(data)
   tt=1:nt
 
+  # Standardize or scale your data
+  if(scale==TRUE){data<-scale(data) }
   # Use lagData() from the mgm package
 
 lagD_obj <- mgm:::lagData(data,
