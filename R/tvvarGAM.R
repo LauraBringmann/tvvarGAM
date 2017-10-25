@@ -54,12 +54,17 @@ tvvarGAM <- function(data, # the n x p data matrix
 
   y <- data
 
+
   #%##########################################%###
   ####  Part 2: ESTIMATING GAM##### #############
   #%##########################################%##
 
   mod_all <- tvvarDATA(data = y,
                        nb = nb,
+                       scale,
+                       beepvar,
+                       dayvar,
+                       consec,
                        pbar = TRUE)$model
 
   # --------- Case: estimates = TRUE ---------
