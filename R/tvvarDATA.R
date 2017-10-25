@@ -10,13 +10,13 @@ tvvarDATA <- function(data, # the n x p data matrix
   # --------- Fill in defaults ---------
 
   if(missing(pbar)) pbar <- TRUE
-
-  if(missing(consec)) consec <- 1:nrow(data) # if not provided, assume all measurements are subsequent
-
+  if(missing(consec)) consec <- NULL
+  if(missing(beepvar)) beepvar <- NULL
+  if(missing(dayvar)) dayvar <- NULL
   # --------- Compute Aux Variables ---------
 
   # ----- Compute consec argument -----
-  mgm::: beepday2consec
+
 
   # Input checks (can only specify consec OR beepvar and dayvar)
 
@@ -28,7 +28,7 @@ tvvarDATA <- function(data, # the n x p data matrix
 
   if(!is.null(beepvar) & !is.null(dayvar)) {
 
-    consec <- beepday2consec(beepvar = beepvar,
+    consec <- mgm:::beepday2consec(beepvar = beepvar,
                              dayvar = dayvar)
 
   } # if: specification of consecutiveness via beepvar and dayvar
