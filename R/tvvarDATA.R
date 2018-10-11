@@ -59,6 +59,7 @@ tvvarDATA <- function(data, # the n x p data matrix
   colnL=paste(coln,"L",sep="")
   colnames(Data2)=c(coln,colnL)
   Data1 <- Data2
+  tt <- 1:(dim(Data1)[1])
 
 
 
