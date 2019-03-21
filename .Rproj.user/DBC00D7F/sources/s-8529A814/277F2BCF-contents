@@ -1,0 +1,21 @@
+
+
+
+
+data_n <- matrix(runif(100*10), 100, 10)
+
+
+out_new <- tvvarGAM(data = data_n, 
+                    nb = 3,
+                    plot = FALSE, 
+                    estimates = TRUE,
+                    thresholding = FALSE,
+                    pbar=TRUE)
+
+
+dim(out_new$Results_GAM)
+
+
+dim(out_new$Results_GAM$Estimate)
+dim(out_new$Results_GAM$CI_low)
+dim(out_new$Results_GAM$CI_high)

@@ -1,15 +1,19 @@
+
+
+
+
 tvvarGAM <- function(data, # the n x p data matrix
                      nb = 10,
                      consec,
                      SIMdata=NULL,
                      simulated = FALSE,
-                     plot = TRUE,
-                     scale=FALSE,
+                     plot = FALSE,
+                     scale = FALSE,
                      beepvar,
                      dayvar,
                      estimates = FALSE,
-                     tvvarOpt="TVVAR",
-                     tresholding=FALSE,
+                     tvvarOpt = "TVVAR",
+                     thresholding = FALSE,
                      pbar){
 
 
@@ -56,6 +60,10 @@ tvvarGAM <- function(data, # the n x p data matrix
 
 
   tt=1:nt
+
+  # Define colnames, if not provided with data
+  if(is.null(colnames(data))) colnames(data) <- paste0("X", 1:nv)
+
   coln<-colnames(data)#Defining the colnames
   if(is.null(coln)) stop("Colnames need to be defined")
   colnL=paste(coln,"L",sep="") #And the lagged colnames
@@ -67,7 +75,7 @@ tvvarGAM <- function(data, # the n x p data matrix
                scale=scale,
                estimates=estimates,
                tvvarOpt=tvvarOpt,
-               tresholding=tresholding)
+               thresholding=thresholding)
 
   #%##########################################%###
   ####  Part 1: creating the data #############
@@ -137,8 +145,8 @@ tvvarGAM <- function(data, # the n x p data matrix
 
 
 
-      #-----------------Tresholding---------------
-      if(tresholding==TRUE){
+      #-----------------thresholding---------------
+      if(thresholding==TRUE){
         for (ii in 1:nv){
 
           mod <- mod_all[[ii]]
@@ -216,7 +224,7 @@ tvvarGAM <- function(data, # the n x p data matrix
 
 
 
-      #---------non tresholding ------------------------
+      #---------non thresholding ------------------------
       else{
         for (ii in 1:nv){
 

@@ -1,17 +1,23 @@
 \name{tvvarGAM}
 \alias{tvvarGAM}
-%- Also NEED an '\alias' for EACH other topic documented here.
+
+
+
 \title{
 Time-varying vector autoregressive models using GAM.
 }
 \description{
 This is the main function of the package tvvarGAM. With this tvvarGAM one can estimate a smooth function for all variables simultaneously, including the intercepts, using generalized additive models (GAM). The output is an object of the mgcv package (the package used to estimate GAM's). In this way, one can easily estimate and plot time-varying smooth functions for all coefficients in a TV-VAR model.
 }
+
+
 \usage{
-tvvarGAM(data, nb = 10,consec,SIMdata=NULL,simulated = FALSE,
-plot = TRUE,estimates = FALSE,tvvarOpt="TVVAR",tresholding=FALSE,pbar, ...)
+tvvarGAM(data, nb = 10, consec, SIMdata = NULL,
+         simulated = FALSE, plot = FALSE, estimates = FALSE,
+         tvvarOpt="TVVAR", tresholding = FALSE, pbar = TRUE,
+         ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{data}{
      n x p data matrix,
@@ -21,7 +27,7 @@ plot = TRUE,estimates = FALSE,tvvarOpt="TVVAR",tresholding=FALSE,pbar, ...)
 }
 
 \item{plot}{
-     Plots the smooth functions of your model. The default is TRUE.
+     Plots the smooth functions of your model. The default is FALSE.
 }
 
 \item{simulated}{
@@ -32,13 +38,13 @@ plot = TRUE,estimates = FALSE,tvvarOpt="TVVAR",tresholding=FALSE,pbar, ...)
     Optional argument. In case your data is simulated you have to feed the simulated data using the tvvarSIM function.
 }
 
-\item{Estimates}{
+\item{estimates}{
     Optional argument. In case you would like the exact parameter values of the smooth functions you can put Estimates=TRUE. This will take much longer than just the standard GAM function. The default is set to FALSE.
 }
 
 \item{tvvarOpt}{If tvvarOpt='TVVAR' a time-varying vector autoregressive model is estimated. Other option is 'VAR', which estimates the standard vector autoregressive model using ordinary least squares. Default is 'TVVAR'.}
 
-\item{tresholding}{If the 95\% credible interval contains a zero the edge-weight is put to zero. Default is FALSE.}
+\item{thresholding}{If the 95\% credible interval contains a zero the edge-weight is put to zero. Default is FALSE.}
 
 \item{pbar}{If pbar = TRUE a progress bar is shown. Defaults to pbar = TRUE.}
 

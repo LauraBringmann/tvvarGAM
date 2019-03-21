@@ -1,3 +1,5 @@
+
+
 tvvarDATA <- function(data, # the n x p data matrix
                       nb = 10,
                       consec,
