@@ -43,9 +43,9 @@ The function returns a list with 1 element:
 # Example 2 - xxx
 }
 \references{
-\insertRef{RobertsLaughlin1996}{tvvarGAM}
+\insertRef{RobertsLaughlin1996}{GGUM}
 
-\insertRef{Robertsetal2000}{tvvarGAM}
+\insertRef{Robertsetal2000}{GGUM}
 }
 \author{
 Laura Bringmann, \email{l.f.bringmann@rug.nl}

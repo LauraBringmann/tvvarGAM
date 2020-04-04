@@ -1,0 +1,19 @@
+% Encoding: windows-1252
+
+@Article{Robertsetal2000,
+  Title                    = {A general item response theory model for unfolding unidimensional polytomous responses},
+  Author                   = {Roberts, J. S. and Donoghue, J. R. and Laughlin, J. E.},
+  Journal                  = {Applied Psychological Measurement},
+  Year                     = {2000},
+  Pages                    = {3-32},
+  Volume                   = {24}
+}
+
+@Article{RobertsLaughlin1996,
+  Title                    = {A unidimensional item response theory model for unfolding responses from a graded disagree-agree response scale},
+  Author                   = {Roberts, J. S. and Laughlin, J. E.},
+  Journal                  = {Applied Psychological Measurement},
+  Year                     = {1996},
+  Pages                    = {231-255},
+  Volume                   = {20}
+}
