@@ -1,12 +1,17 @@
 Package: tvvarGAM
 Type: Package
 Title: Estimates time-varying VAR model using GAM
-Version: 0.1.1
-Author: person("Laura", "Bringmann", email = "L.F.Bringmann@rug.nl",
-                  role = c("aut", "cre"), "Jonas","Haslbeck")
-Maintainer: The package maintainer <L.F.Bringmann@rug.nl>
-Description: With this package one can estimate time-varying vector autoregressive models based on generalized additive models. It uses a regression form making it easy to use. At the moment it can only handly gradual smooth change of both the intercept and the vector autoregressive parameters.
-License: What license is it under?
+Version: 0.2.0
+Authors@R: c(
+  person("Laura", "Bringmann", email = "l.f.bringmann@rug.nl", role = c("aut", "cre")),
+  person("Jonas", "Haslbeck", email = "jonashaslbeck@gmail.com", role = "aut"), 
+  person("Jorge N.", "Tendeiro", email = "j.n.tendeiro@rug.nl", role = "aut"))
+Maintainer: Laura F. Bringmann <l.f.bringmann@rug.nl>
+Description: With this package one can estimate time-varying vector autoregressive models based on generalized additive models. It uses a regression form, making it easy to use. At the moment it can only handle gradual smooth change of both the intercept and the vector autoregressive parameters.
+Imports: stats, graphics, utils, mgcv, mgm, mvtnorm, Rdpack
+RdMacros: Rdpack
 Encoding: UTF-8
-LazyData: truedata
-Imports: mvtnorm, mgcv, MASS, mgm
+License: GPL (>=2)
+LazyData: true
+URL: https://github.com/LauraBringmann/tvvarGAM
+RoxygenNote: 7.1.0

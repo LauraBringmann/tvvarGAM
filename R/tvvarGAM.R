@@ -1,301 +1,187 @@
+#' @import stats graphics utils mgcv mvtnorm
 
 
-
-
-tvvarGAM <- function(data, # the n x p data matrix
-                     nb = 10,
-                     consec,
-                     SIMdata=NULL,
-                     simulated = FALSE,
-                     plot = FALSE,
-                     scale = FALSE,
-                     beepvar,
-                     dayvar,
-                     estimates = FALSE,
-                     tvvarOpt = "TVVAR",
+#' @title Fit the xxx model (gam)
+#'
+#' @description \code{tvvarGAM} xxx.
+#'
+#' @param data An \eqn{(nt\times nv)}{(nt x nv)} data matrix, or an object of
+#'   class 'tvvarSIM'.
+#' @param nb xxx (default = 10).
+#' @param consec xxx (default = \code{NULL}).
+#' @param scale xxx (default = \code{FALSE}).
+#' @param beepvar xxx (default = \code{NULL}).
+#' @param dayvar xxx (default = \code{NULL}).
+#' @param tvvarOpt xxx (default = \code{"TVVAR"}).
+#' @param thresholding xxx (default = \code{FALSE}).
+#' @param pbar xxx (default = \code{TRUE}).
+#'
+#' @return The function returns a list (an object of class \code{tvvarGAM}) with 3
+#'   elements:
+#'   \item{call}{xxx.}
+#'   \item{Results_GAM}{xxx.}
+#'   \item{model}{xxx.}
+#'
+#' @section Details: xxx.
+#'
+#' @references
+#' \insertRef{RobertsLaughlin1996}{GGUM}
+#'
+#' \insertRef{Robertsetal2000}{GGUM}
+#'
+#' @author Laura Bringmann, \email{l.f.bringmann@rug.nl}
+#'
+#' @examples
+#' # Example 1 - xxx
+#'
+#' # Example 2 - xxx
+#' @export
+tvvarGAM <- function(data         = NULL,     # An (nt x nv) data matrix *or* an object of class 'tvvarSIM'
+                     nb           = 10,
+                     consec       = NULL,
+                     scale        = FALSE,
+                     beepvar      = NULL,
+                     dayvar       = NULL,
+                     tvvarOpt     = "TVVAR",
                      thresholding = FALSE,
-                     pbar){
-
-
+                     pbar         = TRUE)
+{
   #---------- Input check ---------
-
-  if(!(is.numeric(data))) stop('Object data has to be numeric.')
-  ifelse(simulated==TRUE,ifelse(is.null(SIMdata)==FALSE,ifelse(plot==TRUE,TRUE,TRUE),stop("SIMdata had to be defined")),TRUE)
-  if(tvvarOpt=="VAR" & estimates==TRUE & plot==FALSE) stop("You cannot get the estimates of a VAR model with this argument, please put estimates=FALSE")
-  if(tvvarOpt=="VAR" & plot==TRUE) stop("With this function you cannot get a plot of the parameters of a VAR model, please put plot=FALSE")
-
-  # --------- Fill in defaults ---------
-
-  if(missing(pbar)) pbar <- TRUE
-  if(missing(consec)) consec <- NULL
-  if(missing(beepvar)) beepvar <- NULL
-  if(missing(dayvar)) dayvar <- NULL
-
-  # --------- Compute Aux Variables ---------
+  ifelse (is.null(data),
+          stop("Parameter 'data' is empty! \n  Either supply a data matrix or a simulated data object of class 'tvvarSIM'."),
+          ifelse(class(data) == "tvvarSIM",
+                 {
+                   SIMdata   <- data
+                   data      <- data$y
+                   simulated <- TRUE
+                 },
+                 ifelse(is.numeric(data),
+                        simulated <- FALSE,
+                        stop("Parameter 'data' is empty! \n  Either supply a data matrix or a simulated data object of class 'tvvarSIM'.")
+                 )
+          )
+  )
 
   # ----- Compute consec argument -----
+  ifelse (is.null(consec),
+          ifelse (is.null(beepvar) || is.null(dayvar),
+                  ifelse (is.null(beepvar) && is.null(dayvar),
+                          consec <- 1:nrow(data),
+                          stop("Parameter 'consec' was not provided; only 'dayvar' or 'beepvar' was provided.\n  In such cases, provide BOTH 'dayvar' and 'beepvar'.")),
+                  consec <- beepday2consec(beepvar = beepvar, dayvar  = dayvar)),
+          if (!is.null(beepvar) || !is.null(dayvar))
+            stop("Please specify the consecutiveness of measurements either via consec, OR via dayvar and beepvar.")
+  )
 
-
-  # Input checks (can only specify consec OR beepvar and dayvar)
-
-  if(!is.null(consec) & !is.null(beepvar)) stop("Please specify the consecutiveness of measurements either via consec, or via dayvar and beepvar")
-  if(!is.null(consec) & !is.null(dayvar)) stop("Please specify the consecutiveness of measurements either via consec, or via dayvar and beepvar")
-
-  if(!is.null(dayvar)) if(is.null(beepvar)) stop("Argument beepvar not specified.")
-  if(!is.null(beepvar)) if(is.null(dayvar)) stop("Argument dayvar not specified.")
-
-  if(!is.null(beepvar) & !is.null(dayvar)) {
-
-    consec <- mgm:::beepday2consec(beepvar = beepvar,
-                                   dayvar = dayvar)
-
-  }
-  else{consec <- 1:nrow(data)}
   # --------- Compute Aux Variables ---------
-
   nt <- nrow(data)
   nv <- ncol(data)
-  if(nv==1){if(is.numeric(data)==FALSE) stop('Object data has to be numeric')}
-  else{if(all(apply(data[,],2,is.numeric))==FALSE) stop('Object data has to be numeric')}
-
-
-  tt=1:nt
-
-  # Define colnames, if not provided with data
-  if(is.null(colnames(data))) colnames(data) <- paste0("X", 1:nv)
-
-  coln<-colnames(data)#Defining the colnames
-  if(is.null(coln)) stop("Colnames need to be defined")
-  colnL=paste(coln,"L",sep="") #And the lagged colnames
-
-  call <- list(data= data,nb=nb,consec=consec,
-               SIMdata=SIMdata,
-               simulated=simulated,
-               plot=plot,
-               scale=scale,
-               estimates=estimates,
-               tvvarOpt=tvvarOpt,
-               thresholding=thresholding)
-
-  #%##########################################%###
-  ####  Part 1: creating the data #############
-  #%##########################################%##
-  #The functions in this part are created in the file (source code for simulation article 3.R)
-
-  y <- data
-
-  #%##########################################%###
-  ####  Part 2: ESTIMATING GAM##### #############
-  #%##########################################%##
-
-  mod_all <- tvvarDATA(data = y,
-                       nb = nb,
-                       pbar = pbar,scale=scale)$model
-
-  # --------- Case: estimates = TRUE ---------
-
-  if(estimates==TRUE | plot==TRUE) {
-
-
-    if(plot==TRUE & simulated==TRUE){
-      par(mfrow=c(nv,(nv+1)))
-      tt=1:nt
-      k=0
-      for (i in 1:nv){
-        mod<-mod_all[[i]]
-
-
-        for ( j in 1:(nv+1))
-
-          if(j==1)
-          {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],xlab="Time",ylab=paste("Intercept of variable",coln[i],sep=""))
-            lines(tt,SIMdata$aint[,i],col="red")
-          }
-        else {plot.gam(mod,seWithMean = TRUE,select=j,rug=F,ylim=c(-1,1),xlab="Time",ylab=paste(coln[i]," is regressed on ",colnL[j-1],sep=""))
-          k=1+k
-
-          lines(tt,SIMdata$rho[,k],col="red")
-
-        }
-      }
-
-    }  else if (plot==TRUE) {  par(mfrow=c(nv,(nv+1)))
-      for (i in 1:nv){
-        mod<-mod_all[[i]]
-
-
-        for ( j in 1:(nv+1))
-          if(j==1)
-          {plot.gam(mod,seWithMean = TRUE,select=1,rug=F,shift=coef(mod)[1],ylab=paste("Intercept of variable",coln[i],sep=""))
-          }
-        else {plot.gam(mod,seWithMean = TRUE,select=j,rug=F,ylim=c(-1,1),xlab="Time",ylab=paste(coln[i]," is regressed on ",colnL[j-1],sep=""))
-
-
-        }
-      }
-
-    }
-
-
-
-    if(estimates==TRUE){
-
-      Results_GAM<-array(NA,c(c(nv+1,nv),nt,3))
-
-
-
-
-      #-----------------thresholding---------------
-      if(thresholding==TRUE){
-        for (ii in 1:nv){
-
-          mod <- mod_all[[ii]]
-
-          mat_dat<-matrix(c(tt,rep(rep(1,nt),nv)),length(tt),nv+1)
-          coln_Data<-colnL
-          coln_Data_full<-c("tt",coln_Data)
-          colnames(mat_dat)<-coln_Data_full
-          newd<-as.data.frame(mat_dat)
-          Xp=predict(mod,newd,type="lpmatrix",seWithMean = TRUE)
-          kdim=dim(Xp)[2]/c(nv+1)
-          newpre=predict(mod,new.data=newd,type="terms",se=TRUE)
-          Results_GAM[1,ii,1:nt,2]<-Xp[,1:kdim]%*% coef(mod)[1:kdim]#basis functions intercept!
-
-
-          Numbrep=5000
-          modr<-mvrnorm(Numbrep,coef(mod),mod$Vp+diag((nv+1)*kdim)*10^(-30))
-
-          #The confidence intervals
-
-
-
-
-
-          int.ci<-matrix(NA,nt,Numbrep)
-          for (m in 1:Numbrep){
-            int.ci[,m]<-  Xp[,1:kdim]%*%modr[m,1:kdim]
-          }
-
-
-
-
-          Results_GAM[1,ii,1:nt,1]<-apply(int.ci,1,quantile,c(.975))
-          Results_GAM[1,ii,1:nt,3]<-apply(int.ci,1,quantile,c(.025))
-
-          for(x in 1:nt){
-            ifelse((Results_GAM[1,ii,x,1]< 0 &&  Results_GAM[1,ii,x,3] > 0) || ( Results_GAM[1,ii,x,1] > 0 &&  Results_GAM[1,ii,x,3] < 0)==TRUE,Results_GAM[1,ii,x,2]<-0,Results_GAM[1,ii,x,2])
-
-          }
-
-
-          for (j in 1:nv){
-            Results_GAM[j+1,ii,1:nt,2]<-Xp[,(j*kdim+1):((j+1)*kdim)]%*% coef(mod)[(j*kdim+1):((j+1)*kdim)]
-
-            #The confidence intervals
-            phi.ci<-matrix(NA,nt,Numbrep)
-            for (m in 1:Numbrep){
-              phi.ci[,m]<-Xp[,(j*kdim+1):((j+1)*kdim)]%*%modr[m,(j*kdim+1):((j+1)*kdim)]
-            }
-            Results_GAM[j+1,ii,1:nt,1]<-apply(phi.ci,1,quantile,c(.975))
-            Results_GAM[j+1,ii,1:nt,3]<-apply(phi.ci,1,quantile,c(.025))
-
-            for(x in 1:nt){
-              ifelse((Results_GAM[j+1,ii,x,1]< 0 &&  Results_GAM[j+1,ii,x,3] > 0) || ( Results_GAM[j+1,ii,x,1] > 0 &&  Results_GAM[j+1,ii,x,3] < 0)==TRUE,Results_GAM[j+1,ii,x,2]<-0,Results_GAM[j+1,ii,x,2])
-
-            }
-
-
-          }
-
-
-
-          Results<-list('Estimate'=Results_GAM[, , , 2],'CI_low'=Results_GAM[, , , 3],'CI_high'=Results_GAM[, , , 1])
-
-
-          outlist<-list(call=call,Results_GAM=Results,model=mod_all)
-
-        }
-
-
-        return(outlist)
-      }
-
-
-
-
-
-      #---------non thresholding ------------------------
-      else{
-        for (ii in 1:nv){
-
-          mod <- mod_all[[ii]]
-
-          mat_dat<-matrix(c(tt,rep(rep(1,nt),nv)),length(tt),nv+1)
-          coln_Data<-colnL
-          coln_Data_full<-c("tt",coln_Data)
-          colnames(mat_dat)<-coln_Data_full
-          newd<-as.data.frame(mat_dat)
-          Xp=predict(mod,newd,type="lpmatrix",seWithMean = TRUE)
-          kdim=dim(Xp)[2]/c(nv+1)
-          newpre=predict(mod,new.data=newd,type="terms",se=TRUE)
-          Results_GAM[1,ii,1:nt,2]<-Xp[,1:kdim]%*% coef(mod)[1:kdim]#basis functions intercept!
-
-
-          Numbrep=5000
-          modr<-mvrnorm(Numbrep,coef(mod),mod$Vp+diag((nv+1)*kdim)*10^(-30))
-
-
-          int.ci<-matrix(NA,nt,Numbrep)
-          for (m in 1:Numbrep){
-            int.ci[,m]<-  Xp[,1:kdim]%*%modr[m,1:kdim]
-          }
-
-          Results_GAM[1,ii,1:nt,1]<-apply(int.ci,1,quantile,c(.975))
-          Results_GAM[1,ii,1:nt,3]<-apply(int.ci,1,quantile,c(.025))
-
-
-          for (j in 1:nv){
-            Results_GAM[j+1,ii,1:nt,2]<-Xp[,(j*kdim+1):((j+1)*kdim)]%*% coef(mod)[(j*kdim+1):((j+1)*kdim)]
-
-            #The confidence intervals
-            phi.ci<-matrix(NA,nt,Numbrep)
-            for (m in 1:Numbrep){
-              phi.ci[,m]<-Xp[,(j*kdim+1):((j+1)*kdim)]%*%modr[m,(j*kdim+1):((j+1)*kdim)]
-            }
-            Results_GAM[j+1,ii,1:nt,1]<-apply(phi.ci,1,quantile,c(.975))
-            Results_GAM[j+1,ii,1:nt,3]<-apply(phi.ci,1,quantile,c(.025))
-          }
-
-
-          Results<-list('Estimate'=Results_GAM[, , , 2],'CI_low'=Results_GAM[, , , 3],'CI_high'=Results_GAM[, , , 1])
-
-
-          outlist<-list(call=call,Results_GAM=Results,model=mod_all)
-
-
-        }
-        return(outlist)
-
-
-      }
-
-
-    }
-
-
-
-
-    # Return Estimates
-
-
-
-
-
-  }
-  else{
-    outlist<-list(call=call,model=mod_all)
-    return(outlist)
+  tt <- 1:nt
+
+  # Define colnames, if not provided with data:
+  if (is.null(colnames(data))) colnames(data) <- paste0("X", 1:nv)
+  coln  <- colnames(data)
+  # The lagged colnames:
+  colnL <- paste0(coln, "L")
+
+  call <- list(data         = if (simulated) SIMdata else data,
+               nb           = nb,
+               consec       = consec,
+               simulated    = simulated,
+               beepvar      = beepvar,
+               dayvar       = dayvar,
+               scale        = scale,
+               tvvarOpt     = tvvarOpt,
+               thresholding = thresholding)
+
+  # --------- Estimating GAM ---------
+  mod_all <- tvvarDATA(data     = data,
+                       tvvarOpt = tvvarOpt,
+                       nb       = nb,
+                       pbar     = pbar,
+                       scale    = scale,
+                       consec   = consec)$model
+
+  # --------- Retrieving results ---------
+  Results_GAM <- array(NA, c(nv+1, nv, nt, 3))
+
+  estimates     <- lapply(1:nv,      function(x) plot(mod_all[[x]], select = "None", n = nt))
+  estimates.fit <- lapply(estimates, function(x) sapply(1:(nv+1), function(y) x[[y]]$fit))
+  estimates.se  <- lapply(estimates, function(x) sapply(1:(nv+1), function(y) x[[y]]$se))
+  estimates.int <- lapply(1:nv,      function(x) cbind(rep(coef(mod_all[[x]])[1], nt), matrix(0, nt, nv)))
+
+  for (ii in 1:nv)
+  {
+    Results_GAM[, ii, , 1] <- t(estimates.int[[ii]] + estimates.fit[[ii]] + estimates.se[[ii]])
+    Results_GAM[, ii, , 2] <- t(estimates.int[[ii]] + estimates.fit[[ii]])
+    Results_GAM[, ii, , 3] <- t(estimates.int[[ii]] + estimates.fit[[ii]] - estimates.se[[ii]])
   }
 
+  if (thresholding)
+  {
+    tmp.sgn                <- sign(Results_GAM[, ii, , 1] * Results_GAM[, ii, , 3]) > 0
+    Results_GAM[, ii, , 2] <- Results_GAM[, ii, , 2] * (tmp.sgn * 1)
+  }
+
+  Results <- list('Estimate' = Results_GAM[, , , 2],
+                  'CI_low'   = Results_GAM[, , , 3],
+                  'CI_high'  = Results_GAM[, , , 1])
+
+  outlist <- list(call        = call,
+                  Results_GAM = Results,
+                  model       = mod_all)
+  class(outlist) <- "tvvarGAM"
+  return(outlist)
 }
 
+# Define plot() method for class "tvvarGAM":
+#' @export
+plot.tvvarGAM <- function(x,   # object of class 'tvvarGAM'
+                          ...)
+{
+  ifelse(class(x$call$data) == "tvvarSIM",
+         data <- x$call$data$y,
+         data <- x$call$data)
+
+  coln  <- colnames(data)
+  colnL <- paste0(coln, "L") # the lagged colnames
+  nv    <- ncol(data)
+  nt    <- nrow(data)
+  tt    <- 1:nt
+
+  par(mfrow = c(nv, nv+1),
+      oma = c(2, 2, .25, .25),
+      mar = c(2, 2, 1, 1),
+      mgp = c(2, 1, 0),
+      xpd = NA)
+
+  for (i in 1:nv) {
+    mod <- x$model[[i]]
+
+    for (j in 1:(nv+1)) {
+      plot.gam(mod,
+               seWithMean = TRUE,
+               select     = j,
+               rug        = FALSE,
+               ylim       = if (j == 1) NULL else c(-1, 1),
+               shift      = if (j == 1) coef(mod)[1] else 0,
+               xlab       = "Time",
+               ylab       = if (j == 1) paste0("Intercept of ", coln[i]) else paste0(coln[i], " ~ ", colnL[j-1]),
+               bty        = "n"
+      )
+
+      if (x$call$simulated)
+      {
+        if (j == 1) lines(tt, x$call$data$aint[, i], col = "red") else lines(tt, x$call$data$rho[, (i-1)*nv + (j-1)], col = "red")
+      }
+    }
+  }
+}
+
+# Define summary() method for class "tvvarGAM":
+#' @export
+summary.tvvarGAM <- function(object,
+                             ...)
+{
+  object[[3]]
+}
