@@ -1,5 +1,7 @@
 .Rproj.user
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
 .Rbuildignore
+tvvarGAM.Rproj
