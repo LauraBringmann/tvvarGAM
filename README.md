@@ -141,5 +141,4 @@ lines(sim_data$rho, col="red")
 
 <figure>
 	<img src="Example_images/Univariate_gam.png" alt="drawing" width="500" height="400"/>
-	<figcaption align="center"><i>Plotted from the code above.</i></figcaption>
 </figure>
