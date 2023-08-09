@@ -158,6 +158,10 @@ tvvarSIM <- function(
   vecsigma <- matrix(sigma, ncol = 1)
   pphi     <- kronecker(matrix(rho[1, ], nv, nv, byrow = T),
                         matrix(rho[1, ], nv, nv, byrow = T))
+  
+  if (!(max(abs(eigen(pphi)$values))<1)){
+    stop("Eigenvalue check failed on phi matrix.")
+  }
 
   y      <- matrix(NA, nt, nv)
   y[1, ] <- rmvnorm(1,
