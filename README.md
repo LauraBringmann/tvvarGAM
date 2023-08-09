@@ -143,8 +143,3 @@ lines(sim_data$rho, col="red")
 	<img src="Example_images/Univariate_gam.png" alt="drawing" width="500" height="400"/>
 	<figcaption align="center"><i>Plotted from the code above.</i></figcaption>
 </figure>
-
-<figure>
-	<img src="Example_images/Univariate_tvvarGAM.png" alt="drawing" width="500" height="400"/>
-	<figcaption align="center"><i>For contrast, the plot from the univariate example.</i></figcaption>
-</figure>
