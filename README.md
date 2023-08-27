@@ -1,6 +1,5 @@
 # tvvarGAM
-tvvarGAM package as featured in [“A Tutorial on Estimating Time-Varying Vector
-Autoregressive Models” (Haslbeck, Bringmann & Waldorp, 2020)](https://doi.org/10.1080/00273171.2020.1743630).
+The tvvarGAM package, as featured in [“A Tutorial on Estimating Time-Varying Vector Autoregressive Models” (Haslbeck et al., 2020)](https://doi.org/10.1080/00273171.2020.1743630) and described in [“Changing dynamics: Time-varying autoregressive models using generalized additive modeling.” (Bringmann et al., 2017)](https://doi.org/10.1037/met0000085) and [“Modeling Nonstationary Emotion Dynamics in Dyads using a Time-Varying Vector-Autoregressive Model” (Bringmann et al., 2018)](https://doi.org/10.1080/00273171.2018.1439722)
 
 With this package one can estimate time-varying vector autoregressive models based on generalized additive models. It uses a regression form, making it easy to use. At the moment it can only handle gradual smooth change of both the intercept and the vector autoregressive parameters.
 
@@ -8,14 +7,14 @@ With this package one can estimate time-varying vector autoregressive models bas
 
 ```r
 tvvarSIM <- function(
-  nt,                        # number of time points
-  nv,                        # number of variables
-  FUN.aint = rep(1, nv),     # vector of length nv with 1s=invariant, 2s=linear, 3s=sine, setting type of intercept variance
-  max.aint = rep(1, nv),     # vector of length nv with maximum values for the intercepts
-  FUN.rho  = rep(1 , nv*nv), # matrix of shape (nv*nv) with 1s=invariant, 2s=linear, 3s=sine, setting type of relationship between variables and lagged variables 
-  max.rho  = rep(.4, nv*nv), # matrix of shape (nv*nv) with maximum correlations between variables and lagged variables
-  min.cor  = .1,             # minimum correlation value between variables
-  max.cor  = .5              # maximum correlation value between variables
+  nt,                        # Number of time points
+  nv,                        # Number of variables
+  FUN.aint = rep(1, nv),     # Vector of length nv with 1s=invariant, 2s=linear, 3s=sine, setting type of intercept variance
+  max.aint = rep(1, nv),     # Vector of length nv with maximum values for the intercepts
+  FUN.rho  = rep(1 , nv*nv), # Matrix of shape (nv*nv) with 1s=invariant, 2s=linear, 3s=sine, setting type of relationship between variables and lagged variables 
+  max.rho  = rep(.4, nv*nv), # Matrix of shape (nv*nv) with maximum correlations between variables and lagged variables
+  min.cor  = .1,             # Minimum correlation value between innovation of the variables
+  max.cor  = .5              # Maximum correlation value between innovation of the variables
 )
 
 # Returns object of class tvvarSIM: list(y, aint, rho, sigma)
@@ -27,7 +26,7 @@ Caution: There are no checks implemented for the length/size of the inputs. Be s
 
 ```r
 # Simulate data
-set.seed(12345) # For the example
+set.seed(12345) # For this example
 nt <- 500
 nv <- 1
 sim_data <- tvvarSIM(nt, nv)
@@ -56,7 +55,7 @@ The reason that both values are constant is that time-invariance is what the tvv
 
 ```r
 # Simulate data
-set.seed(12345) # For the example
+set.seed(12345) # For this example
 nt <- 500
 nv <- 2
 
@@ -64,14 +63,14 @@ simdata <- tvvarSIM(nt, nv,
   FUN.aint = c(3, 1),   # This vector specifies one sine intercept(y1) and one time-invariant intercept(y2)
   max.aint = c(1, 1),   # Max value of both intercepts set to 1
 	
-  FUN.rho  = c(1, 2,    # Relationship to own lagged version are each time-invariant, while the relationships to lagged version of different variables are both linear
-	       2, 1),    # since there are 1s on the diagonal and 2s on the off-diagonal
+  FUN.rho  = c(1, 2,    # Relationship to own lagged version are each time-invariant, while the relationships to lagged version of different variables are both linear, since there are 1s on the diagonal and 2s on the off-diagonal
+	       2, 1),   
 	
-  max.rho  = c(.3, .4,  # Different max values set for the correlations between the variables and the lagged variables.
-	       .1, .5), # Autocorrelations on the diagonal, off-diagonal correlations are those between different variables.
+  max.rho  = c(.3, .4,  # Different max values set for the correlations between the variables and the lagged variables
+	       .1, .5), # Autocorrelations on the diagonal, off-diagonal correlations are those between different variables
 	
-  min.cor  = .1,        # Min correlation value between the variables 
-  max.cor  = .5         # Max correlation value between the variables
+  min.cor  = .1,        # Min correlation value between the innovation of the variables
+  max.cor  = .5         # Max correlation value between the innovation of the variables
 )
 ```
 
@@ -115,10 +114,11 @@ simdata <- tvvarSIM(nt, nv,
 ### Estimation: Time-invariant vs. time-variant model for time-invariant data
 
 In contrast to the first example, using a model that assumes time-invariance when there are time-invariant parameters will achieve much more accurate results.
+You can also check for whether a time-invariant model is better or not by using the AIC and BIC model selection methods (see [Bringmann et al., 2017](https://doi.org/10.1037/met0000085); [Bringmann et al., 2018](https://doi.org/10.1080/00273171.2018.1439722)).
 
 ```r
 # Simulate data
-set.seed(12345) # For the example
+set.seed(12345) # For this example
 nt <- 500
 nv <- 1
 sim_data <- tvvarSIM(nt, nv)
