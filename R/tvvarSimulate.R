@@ -61,17 +61,17 @@ choose.coefaint <- function(
 stat.check <- function(
   nt, # number of time points
   nv, # number of variables
-  rho # ??
+  rho # matrix holding autocorrelation and cross-lagged effects
 )
 {
-  WAAR <- c()
+  CORRECT <- c()
   tmp  <- rep(NA, nt)
   for (t in 1:nt)
   {
     tmp[t] <- ifelse (max(abs(eigen(matrix(rho[t, ], nv, nv))$values)) < 1, 1, 0)
   }
-  WAAR <- all(tmp == 1)
-  return(WAAR)
+  CORRECT <- all(tmp == 1)
+  return(CORRECT)
 }
 
 # Here you can choose a function for the auto and cross effects:
